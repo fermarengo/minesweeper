@@ -17,7 +17,11 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
 
+from api.views import create_board, show_board
+
 urlpatterns = [
 	path('', TemplateView.as_view(template_name='index.html'), name='index'),
+	path('create_board/', create_board, name='create_board'),
+    path('show_board/', show_board, name='show_board'),
     path('admin/', admin.site.urls),
 ]

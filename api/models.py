@@ -2,7 +2,6 @@ from django.db import models
 
 import random
 
-
 #Levels are represeneted by a tuple (TABLE SIZE, NUMBER OF MINES)
 BEGGINNER = (9, 10)
 INTERMEDIATE = (16, 40)
@@ -21,14 +20,6 @@ LEVELS_DICT = {
 }
 
 
-def is_valid_cell(self, table_size, x_cor, y_cor):
-    """
-    Returns True if row number and column number is in range
-    """
-    return x_cor > 0 and x_cor <= table_size and \
-           y_cor > 0 and x_cor <= table_size
-
-
 class Board(models.Model):
     """ 
     A new board is created for each game.
@@ -36,11 +27,7 @@ class Board(models.Model):
     """
     level = models.CharField(max_length=1 ,choices=LEVELS)
     finished = models.BooleanField(default=False)
-
-    def __init__(self, *args, **kwargs):
-        super(Board, self).__init__(*args, **kwargs)
-        self.save()
-        self.place_mines()
+    mines_placed = models.BooleanField(default=False)
 
     def place_mines(self):
         """
@@ -58,7 +45,7 @@ class Board(models.Model):
 
             if (x_cordenade, y_cordenade) not in list_of_mines:
                 list_of_mines.append((x_cordenade, y_cordenade))
-        
+
         # Here we create the mined cells
         for i in list_of_mines:
             c = Cell(x_cordenade=i[0], 
@@ -66,8 +53,6 @@ class Board(models.Model):
                      board=self,
                      has_mine=True)
             c.save()
-        print("mined cells")
-        print(list_of_mines)
 
         # Here we crete not mined cell
         not_mined_cells = []
@@ -81,8 +66,9 @@ class Board(models.Model):
                              has_mine=False)
                     c.save()
                     not_mined_cells.append(cordenade)
-        print("not mined cells")
-        print(not_mined_cells)
+        
+        self.mines_placed = True
+        self.save()
 
 
     def get_mines_cordenades(self):
@@ -90,6 +76,11 @@ class Board(models.Model):
         Return a list of tuples with the mines cordenades
         """
         pass
+
+    def create(self, values):
+        board = super(res_partner, self).create(values)
+        board.place_mines()
+        return record
 
 
 class Cell(models.Model):
