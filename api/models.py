@@ -77,10 +77,11 @@ class Board(models.Model):
         """
         pass
 
-    def create(self, values):
-        board = super(res_partner, self).create(values)
-        board.place_mines()
-        return record
+    @property
+    def table_size(self):
+        return LEVELS_DICT[self.level][1]
+
+
 
 
 class Cell(models.Model):

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from api.models import Board, Cell
+from api.models import LEVELS_DICT
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -17,9 +18,11 @@ class CellSerializer(serializers.ModelSerializer):
         fields = ('id', 'board', 'has_mine', 'marked_as_mined', 
                   'x_cordenade', 'y_cordenade', 'value')
 
+
 class DetailBoardSerializer(serializers.ModelSerializer):
     cell_set = CellSerializer(many=True)
+    table_size = serializers.ReadOnlyField()
     
     class Meta:
         model = Board
-        fields = ('id', 'finished', 'cell_set')
+        fields = ('id', 'finished', 'cell_set', 'table_size')

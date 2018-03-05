@@ -2,16 +2,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
-	<script src="{% static 'js/jquery/jquery3.3.1.js' %}"></script>
+    <title></title>
+    <script src="{% static 'js/jquery/jquery3.3.1.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <script type="text/javascript">
-    	
+
+        function marked_as_mined(board_id, x_cor, y_cor) {
+            $.ajax({
+                type: "PUT",
+                url: "/mark_cell_as_mined/",
+                dataType: "json",
+                data: { 'board_id' : board_id, 'x_cor': x_cor, 'y_cor': y_cor },
+                success: function(response){
+                    location.reload();
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
+        
+        function create_table(size) {
+            var html = '';
+            for ( y=1; y<=size; y++) {
+                html += '<tr>'
+                for ( x=1; x<=size; x++) {
+                    var html_id = x + "-" + y
+                    html += '<th class="cell" data-x="'+x+'" data-y="'+y+'" id="'+html_id+'"></th>'; 
+                }
+                html += '</tr>'
+            }
+            $("#board_table").html(html);
+        }
+
+        function show_mines(cells) {
+            for ( i=0; i < cells.length; i++) {
+                if ( cells[i].marked_as_mined ) {
+                    var x_cor = cells[i]['x_cordenade']
+                    var y_cor = cells[i]['y_cordenade']
+                    var id_ = x_cor+"-"+y_cor
+                    $("#"+id_).addClass("cell_marked_as_mined")
+                }
+            }
+        }
+        
+        function add_envents(board_id){
+            var cells = document.getElementsByClassName("cell")
+            for (var i=0 ; i<cells.length; i++) {
+                cells[i].addEventListener('contextmenu' , function (ev) { 
+                    ev.preventDefault();
+                    var x_cor = ev.path[0].getAttribute("data-x")
+                    var y_cor = ev.path[0].getAttribute("data-y")
+                    marked_as_mined(board_id, x_cor, y_cor)
+                } , false ) ; 
+            }
+        }
+
+        $( document ).ready(function() {
+            var url = window.location.href;
+            var pk = url.substring(url.lastIndexOf('/') + 1);
+            $.ajax({
+                type: "GET",
+                url: "/detail_board/" + pk,
+                dataType: "json",
+                success: function(response){
+                    create_table(response['table_size']);
+                    show_mines(response['cell_set']);
+                    add_envents(pk);
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        });
     </script>
+    <style type="text/css">
+        tr th {
+            border: 1px solid black;
+            width: 40px;
+            height: 40px;
+        }
+
+        .cell_marked_as_mined {
+            background-color: yellow;
+        }
+
+    </style>
 </head>
 <body>
-	<div class=container>
-		
-	</div>
+    <div class=container>
+        <table id="board_table" class="table" border="2" style="margin-top:80px;">
+            
+        </table>
+    </div>
 </body>
 </html>
